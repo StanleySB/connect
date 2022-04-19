@@ -11,6 +11,11 @@ class ToastManager {
     };
 
     GD.S_TOAST.add((txt) => {
+      if (this.toasts.size >= 10) {
+        const firstToast = this.toasts.entries().next().value[0];
+        this.toasts.delete(firstToast);
+      }
+
       const tempUID: string = btoa(Math.random() * 10000 + "_" + +new Date());
 
       this.toasts.set(tempUID, {

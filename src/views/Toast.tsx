@@ -23,11 +23,13 @@ const ToastDiv = styled.div`
   top: 0;
   left: 0;
   width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 `;
 
 const ToastItemDiv = styled.div`
   position: absolute;
-  right: 50px;
   border-radius: 15px;
   padding: 5px 10px;
   background: ${CSS.toastBGColor};
@@ -37,6 +39,8 @@ const ToastItemDiv = styled.div`
   align-items: center;
   animation: ${show} 0.5s linear;
   transition: 0.5s ease;
+  min-width: 200px;
+  max-width: 100%;
 `;
 
 const ToastItemDeleteBtn = styled.div`
@@ -58,7 +62,7 @@ const ToastItem = (params: { toast: ToastVO; position: number; deletedToast: str
     if (!toastRef.current.getAttribute("active")) {
       TweenLite.to(toastRef.current, 0.5, {
         opacity: 0,
-        top: `50px`,
+        top: `0px`,
         ease: "ease",
         onComplete: () => {
           if (toastRef.current) {
