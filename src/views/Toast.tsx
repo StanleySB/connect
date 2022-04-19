@@ -41,6 +41,7 @@ const ToastItemDiv = styled.div`
   transition: 0.5s ease;
   min-width: 200px;
   max-width: 100%;
+  z-index: 11;
 `;
 
 const ToastItemDeleteBtn = styled.div`
@@ -111,13 +112,8 @@ const Toast = () => {
     };
   }, []);
 
-  const test = () => {
-    GD.S_TOAST.invoke(`"test toast" + ${toasts.length}`);
-  };
-
   return (
     <ToastDiv>
-      <button onClick={test}>toast</button>
       {toasts.length > 0 &&
         toasts.map((val, index) => <ToastItem toast={val} key={val.state + index} position={index} deletedToast={deletedToast} setToasts={setToasts} />)}
     </ToastDiv>

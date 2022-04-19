@@ -1,6 +1,6 @@
 import GD from "../GD";
 
-const TOAST_ACTIVE_TIME = 20000;
+const TOAST_ACTIVE_TIME = 5000;
 
 class ToastManager {
   private toasts: Map<string, ToastVO> = new Map();
