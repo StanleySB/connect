@@ -2,7 +2,7 @@
   "name": "support-chat-widget",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "https://stanleysb.github.io/connect/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.7",
@@ -12,6 +12,7 @@
     "@types/preval.macro": "^3.0.0",
     "@types/react": "^17.0.9",
     "@types/react-dom": "^17.0.6",
+    "gh-pages": "^3.2.3",
     "gsap": "^3.6.1",
     "preval.macro": "^5.0.0",
     "react": "^17.0.2",
@@ -24,7 +25,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
