@@ -37,6 +37,7 @@ class Config {
             username: '28224511:1379330808'
         }*/
   ];
+  static TOAST_ACTIVE_TIME = 1000 * 5;
 
   schemes: Schemes = {
     live: {
@@ -63,11 +64,7 @@ class Config {
   constructor() {
     GD.S_SHARED_OBJECT_READY.add((so) => {
       GD.S_LOG.invoke("SETUP SCEHEMES");
-      if (
-        so.scheme &&
-        (so.scheme === "live" || so.scheme === "test" || so.scheme === "pre")
-      )
-        this.schemes.current = so.scheme;
+      if (so.scheme && (so.scheme === "live" || so.scheme === "test" || so.scheme === "pre")) this.schemes.current = so.scheme;
     });
 
     GD.REQ_CONFIG_SCHEMES.listener = (data, cb) => {

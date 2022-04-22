@@ -1,6 +1,5 @@
+import Config from "../Config";
 import GD from "../GD";
-
-const TOAST_ACTIVE_TIME = 5000;
 
 class ToastManager {
   private toasts: Map<string, ToastVO> = new Map();
@@ -27,7 +26,7 @@ class ToastManager {
 
       setTimeout(() => {
         GD.S_TOAST_DELETE.invoke(tempUID);
-      }, TOAST_ACTIVE_TIME);
+      }, Config.TOAST_ACTIVE_TIME);
     });
 
     GD.S_TOAST_DELETE.add((tempUID) => {

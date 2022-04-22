@@ -4,12 +4,7 @@ import GD from "../../GD";
 import { Services } from "../../utils/Services";
 import Avatar from "../Avatar";
 import CSS from "../CSS";
-import {
-  MessageBotCommand,
-  MessageBotMenu,
-  MessageFile,
-  MessageImage,
-} from "./ChatInnerMessages";
+import { MessageBotCommand, MessageBotMenu, MessageFile, MessageImage } from "./ChatInnerMessages";
 
 const ChatMessagesDiv = styled.div`
   display: flex;
@@ -17,6 +12,8 @@ const ChatMessagesDiv = styled.div`
   padding: 10px;
 `;
 let currentChatUID: string | null = null;
+let lastReadMessage: number | undefined = undefined;
+let lastReadMessageIndex: number | null = null;
 GD.S_CHAT_OPENING.add((data) => {});
 
 GD.S_CHAT_OPEN_REQUEST.add((data) => {
@@ -25,23 +22,29 @@ GD.S_CHAT_OPEN_REQUEST.add((data) => {
 
 const ChatMessages = () => {
   const [messages, setMessages] = useState<MessageVO[]>([]);
+  lastReadMessageIndex = [...messages].findIndex((message) => message.num === lastReadMessage) || null;
+
   useEffect(() => {
     GD.S_CHAT_MESSAGES.add((data) => {
       if (currentChatUID !== data.chatUID) return;
       setMessages([...data.msgs]);
     }, "ChatMessages");
 
+    GD.S_CHAT_STATUS_READ.add(() => {
+      currentChatUID && GD.REQ_LAST_READ_MSG.invoke({ chatUID: currentChatUID }).then((result) => (lastReadMessage = result?.lastReadMsgNum));
+    }, "ChatMessages");
+
     GD.S_GUI_MESSAGES_RENDERED.invoke();
 
     return () => {
       GD.S_CHAT_MESSAGES.clearContext("ChatMessages");
+      GD.S_CHAT_STATUS_READ.clearContext("ChatMessages");
     };
   });
 
   let msgs = null;
   let i = 0;
-  if (messages && messages.length > 0)
-    msgs = messages.map((val) => <ChatMessage message={val} key={i++} />);
+  if (messages && messages.length > 0) msgs = messages.map((val, index) => <ChatMessage message={val} key={i++} index={index} />);
 
   return <ChatMessagesDiv>{msgs}</ChatMessagesDiv>;
 };
@@ -157,6 +160,21 @@ const TextItemTextDiv = styled(TextBaseDiv)`
   margin: 0 15px 0 15px;
 `;
 
+const ChatMessageRead = styled.div`
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABUUlEQVRIie2SsUrDUBiFv5tcIejcgOAbtLZUFzex3XQQKnR08BkC2hcQxb6EjhmyiYtxEMRJkdCAg7vSWcEhudehsWmDqU0nwZ7xkP/Lf85/Ya65/rzErINVz7FFZF4JeH9qn27m+cbscMMH1jRYk3xZFF53OyUVqWugAjxHqN1JfqGK6m6npFA+sJpAtsL22VueXziBRp0nkFDLuBG2uv2q59gqin0QFdA9LVUzbHX73zMFK9J3IJSW8UGQwAedp/BgBA5JRTX36FagF5WMt0c/qLmH9wIWsj6MHjQfDpC8Im1pWBeR4Vc9x04rQf7kTwsfJsgeSZpm42Hv+PUnX8U6yjto7g/SrcwboAy6pz/VRrDf/chum4z9unmmIgha3b6WcQMIQZSxjJXUV80BXFSKwMcSDJNcOEvSksuP7ZOXMd9zbCLzEgAZ70wDn+uf6AselN1N/IXehQAAAABJRU5ErkJggg==);
+`;
+const ChatMessageDelivered = styled.div`
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA20lEQVRIie2UsQrCMBRFb4Ip/kD7FUoHacFJ1E0Hf9XFzc4uJRBw8BPET+iT1MFWQg21abrZO+aFe+57eQQYNcpXbCgjpVRUFMURACVJsqrP+VDmRJQxxpaMsalZ8wZIKUMiOgOYAbhprQ9m3WtEUspQa50BmFfm6zRN74MAupj3BnQ17wVwMbcC8jy/ABBCiF0cxw+zVm8L3g96FUJsm3ea+tqisiwnABZElCmlIh9zawfNEQDYcM6fLmNpBdjSVsdOyVsBlk7gmvwnAPj8LycACIJg75J81B/pBUirmXOOwxAnAAAAAElFTkSuQmCC);
+`;
+
 const TextItem = (params: { data: { content: string; type: string } }) => {
   const { content, type } = params.data;
   if (type === "link") {
@@ -241,15 +259,12 @@ const ChatMessageText = memo((params: { msg: MessageVO }) => {
   const textBlocksArr: { type: string; content: string }[] = [];
   for (let i in textBlocks) {
     const tblock = textBlocks[i];
-    if (tblock.length > 0)
-      textBlocksArr.push({ type: "text", content: tblock });
+    if (tblock.length > 0) textBlocksArr.push({ type: "text", content: tblock });
     const block = blocks[i];
     if (block) textBlocksArr.push(block);
   }
   let i = 0;
-  const blockitems = textBlocksArr.map((val) => (
-    <TextItem data={val} key={i++} />
-  ));
+  const blockitems = textBlocksArr.map((val) => <TextItem data={val} key={i++} />);
 
   // br, links, etc...
   let status = null;
@@ -259,12 +274,7 @@ const ChatMessageText = memo((params: { msg: MessageVO }) => {
   if (text === "-") status = "minus";
 
   return (
-    <ChatMessageTextDiv
-      data-status={status}
-      data-full-width={needFullWidth}
-      data-mine={mine}
-      data-type="message"
-    >
+    <ChatMessageTextDiv data-status={status} data-full-width={needFullWidth} data-mine={mine} data-type="message">
       {blockitems}
     </ChatMessageTextDiv>
   );
@@ -309,25 +319,19 @@ const ChatMessageDiv = styled.div`
   &[data-mine="true"] {
     &[data-position="middle"] {
       & div[data-type="message"] {
-        border-radius: ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageSmallBorderRadius}
-          ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius};
+        border-radius: ${CSS.chatMessageBorderRadius} ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius};
       }
     }
 
     &[data-position="first"] {
       & div[data-type="message"] {
-        border-radius: ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageBorderRadius} ${CSS.chatMessageSmallBorderRadius}
-          ${CSS.chatMessageBorderRadius};
+        border-radius: ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius};
       }
     }
 
     &[data-position="last"] {
       & div[data-type="message"] {
-        border-radius: ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageBorderRadius};
+        border-radius: ${CSS.chatMessageBorderRadius} ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius};
       }
     }
   }
@@ -335,25 +339,19 @@ const ChatMessageDiv = styled.div`
   &[data-mine="false"] {
     &[data-position="middle"] {
       & div[data-type="message"] {
-        border-radius: ${CSS.chatMessageSmallBorderRadius}
-          ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageSmallBorderRadius};
+        border-radius: ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageSmallBorderRadius};
       }
     }
 
     &[data-position="first"] {
       & div[data-type="message"] {
-        border-radius: ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageSmallBorderRadius};
+        border-radius: ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageSmallBorderRadius};
       }
     }
 
     &[data-position="last"] {
       & div[data-type="message"] {
-        border-radius: ${CSS.chatMessageSmallBorderRadius}
-          ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius}
-          ${CSS.chatMessageBorderRadius};
+        border-radius: ${CSS.chatMessageSmallBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius} ${CSS.chatMessageBorderRadius};
       }
     }
   }
@@ -416,20 +414,17 @@ const MessageTime = (params: { message: MessageVO }) => {
   return <TimeDiv data-type="time">{time}</TimeDiv>;
 };
 
-const ChatMessage = (params: { message: MessageVO }) => {
-  const { message } = params;
+const ChatMessage = (params: { message: MessageVO; index: number }) => {
+  const { message, index } = params;
   let inner = null;
   if (message.sys) {
-    if (message.type === "botMenu")
-      inner = <MessageBotMenu data={message.sys} msg={message} />;
-    if (message.type === "botCommand")
-      inner = <MessageBotCommand msg={message} />;
+    if (message.type === "botMenu") inner = <MessageBotMenu data={message.sys} msg={message} />;
+    if (message.type === "botCommand") inner = <MessageBotCommand msg={message} />;
     if (message.type === "img") inner = <MessageImage msg={message} />;
     if (message.type === "file") inner = <MessageFile msg={message} />;
 
     if (inner == null) message.text = message.sys?.title;
-    if (!message.text)
-      message.text = `System msg ${message.sys.method} without title`;
+    if (!message.text) message.text = `System msg ${message.sys.method} without title`;
   }
 
   const onMsgClick = (e: React.MouseEvent) => {
@@ -441,16 +436,10 @@ const ChatMessage = (params: { message: MessageVO }) => {
 
   let author = null;
   let avatar = null;
-  if (
-    !message.mine &&
-    (message.position === "first" || message.position === "standalone")
-  )
+  if (!message.mine && (message.position === "first" || message.position === "standalone"))
     author = <ChatMessageAuthorDiv>{message.user_name}</ChatMessageAuthorDiv>;
 
-  if (
-    !message.mine &&
-    (message.position === "last" || message.position === "standalone")
-  )
+  if (!message.mine && (message.position === "last" || message.position === "standalone"))
     avatar = (
       <ChatAvatarHolderDiv>
         <Avatar user={message.user_uid} avatar={message.user_avatar} />
@@ -461,13 +450,12 @@ const ChatMessage = (params: { message: MessageVO }) => {
   return (
     <>
       {date}
-      <ChatMessageDiv
-        data-position={message.position}
-        data-mine={message.mine}
-        onClick={onMsgClick}
-      >
+      <ChatMessageDiv data-position={message.position} data-mine={message.mine} onClick={onMsgClick}>
         <MessageTime message={message} />
         {author}
+        {index === lastReadMessageIndex && message.mine && <ChatMessageRead />}
+        {(lastReadMessageIndex === null && <ChatMessageDelivered />) ||
+          (lastReadMessageIndex && index > lastReadMessageIndex && message.mine && <ChatMessageDelivered />)}
         {inner}
         {avatar}
       </ChatMessageDiv>

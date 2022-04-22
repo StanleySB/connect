@@ -177,9 +177,8 @@ const AuthPanel = () => {
     GD.S_AUTH_CODE_REQUESTED.add(() => {
       setState("code");
       setIsLoading(false);
+      if (login.current) login.current.value = "";
     }, "authpanel");
-
-    if (login.current) login.current.value = "";
 
     GD.S_AUTH_ERROR.add((txt) => {
       GD.S_LOGE.invoke(txt);
@@ -235,22 +234,9 @@ const AuthPanel = () => {
         <AuthHeadDiv>Web Chat</AuthHeadDiv>
         <AuthFormContainer>
           <AuthInputContainer>
-            <AuthInput
-              ref={login}
-              type="text"
-              name="login"
-              placeholder="Login"
-            />
-            <AuthInput
-              ref={pass}
-              type="password"
-              name="password"
-              placeholder="Password"
-            />
-            <AuthSwitch
-              onClick={() => setRemember(!remember)}
-              data-selected={remember}
-            >
+            <AuthInput ref={login} type="text" name="login" placeholder="Login" />
+            <AuthInput ref={pass} type="password" name="password" placeholder="Password" />
+            <AuthSwitch onClick={() => setRemember(!remember)} data-selected={remember}>
               Remember Me
             </AuthSwitch>
             {errorMsg && <AuthErrorDiv>{errorMsg}</AuthErrorDiv>}
@@ -259,10 +245,7 @@ const AuthPanel = () => {
             <AuthButton onClick={doSend} disabled={isLoading}>
               Login
             </AuthButton>
-            <AuthButton
-              onClick={() => changeState("phone")}
-              disabled={isLoading}
-            >
+            <AuthButton onClick={() => changeState("phone")} disabled={isLoading}>
               Enter by phone
             </AuthButton>
           </AuthButtonContainer>
@@ -274,18 +257,11 @@ const AuthPanel = () => {
       <AuthDiv>
         <AuthHeadDiv>
           Web Chat
-          <div>
-            Please provide your phone number to get verification code via SMS
-          </div>
+          <div>Please provide your phone number to get verification code via SMS</div>
         </AuthHeadDiv>
         <AuthFormContainer>
           <AuthInputContainer>
-            <AuthInput
-              ref={login}
-              type="phone"
-              name="phone"
-              placeholder="Phone"
-            />
+            <AuthInput ref={login} type="phone" name="phone" placeholder="Phone" />
             {errorMsg && <AuthErrorDiv>{errorMsg}</AuthErrorDiv>}
           </AuthInputContainer>
           <AuthButtonContainer>
@@ -308,25 +284,15 @@ const AuthPanel = () => {
         </AuthHeadDiv>
         <AuthFormContainer>
           <AuthInputContainer>
-            <AuthInput
-              ref={login}
-              type="number"
-              name="code"
-              placeholder="Code"
-            />
-            <AuthSwitch onClick={() => setRemember(!remember)}>
-              Remember Me
-            </AuthSwitch>
+            <AuthInput ref={login} type="number" name="code" placeholder="Code" />
+            <AuthSwitch onClick={() => setRemember(!remember)}>Remember Me</AuthSwitch>
             {errorMsg && <AuthErrorDiv>{errorMsg}</AuthErrorDiv>}
           </AuthInputContainer>
           <AuthButtonContainer>
             <AuthButton onClick={doSend} disabled={isLoading}>
               Login
             </AuthButton>
-            <AuthButton
-              onClick={() => changeState("phone")}
-              disabled={isLoading}
-            >
+            <AuthButton onClick={() => changeState("phone")} disabled={isLoading}>
               Reenter Phone
             </AuthButton>
             <AuthButton onClick={() => changeState("web")} disabled={isLoading}>
