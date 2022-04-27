@@ -16,6 +16,7 @@ import Messages from "./managers/Messages";
 import Users from "./managers/Users";
 import ToastManager from "./managers/ToastManager";
 import ChatStatusManager from "./managers/ChatStatusManager";
+import ChatUsersStatusManager from "./managers/ChatUsersStatusManager";
 import Company from "./managers/Company";
 import CallManager from "./managers/CallManager";
 import { Services } from "./utils/Services";
@@ -24,7 +25,24 @@ class Main {
   static version = "3.0.8";
 
   static main() {
-    let services = [Logger, Config, Images, Files, WS, HTTP, Auth, Messages, ChatManager, CallManager, Latest, Company, ToastManager, Users, ChatStatusManager];
+    let services = [
+      Logger,
+      Config,
+      Images,
+      Files,
+      WS,
+      HTTP,
+      Auth,
+      Messages,
+      ChatManager,
+      CallManager,
+      Latest,
+      Company,
+      ToastManager,
+      Users,
+      ChatStatusManager,
+      ChatUsersStatusManager,
+    ];
 
     let done = 0;
     GD.S_SERVICE_READY.add((name) => {

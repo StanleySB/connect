@@ -4,6 +4,8 @@ import GD from "../../GD";
 import { Services } from "../../utils/Services";
 import Avatar from "../Avatar";
 import CSS from "../CSS";
+import MessageStatus from "../MessageStatus";
+import ProgressBar from "../ProgressBar";
 import { MessageBotCommand, MessageBotMenu, MessageFile, MessageImage } from "./ChatInnerMessages";
 
 const ChatMessagesDiv = styled.div`
@@ -12,9 +14,14 @@ const ChatMessagesDiv = styled.div`
   padding: 10px;
 `;
 let currentChatUID: string | null = null;
-let lastReadMessage: number | undefined = undefined;
-let lastReadMessageIndex: number | null = null;
-GD.S_CHAT_OPENING.add((data) => {});
+let currentChatUsers: Array<string> = [];
+let everyUserReadMessageID: Array<number> = [];
+let messageReadByUser: Map<string, { lastReadMsgID: number }> = new Map();
+
+GD.S_CHAT_OPENING.add((data) => {
+  currentChatUsers = data.users.map((user) => user.uid);
+  messageReadByUser = new Map();
+});
 
 GD.S_CHAT_OPEN_REQUEST.add((data) => {
   if (data.chatUID) currentChatUID = data.chatUID;
@@ -22,7 +29,7 @@ GD.S_CHAT_OPEN_REQUEST.add((data) => {
 
 const ChatMessages = () => {
   const [messages, setMessages] = useState<MessageVO[]>([]);
-  lastReadMessageIndex = [...messages].findIndex((message) => message.num === lastReadMessage) || null;
+  everyUserReadMessageID = currentChatUsers.map((user) => messageReadByUser.get(user)?.lastReadMsgID || 0);
 
   useEffect(() => {
     GD.S_CHAT_MESSAGES.add((data) => {
@@ -31,7 +38,10 @@ const ChatMessages = () => {
     }, "ChatMessages");
 
     GD.S_CHAT_STATUS_READ.add(() => {
-      currentChatUID && GD.REQ_LAST_READ_MSG.invoke({ chatUID: currentChatUID }).then((result) => (lastReadMessage = result?.lastReadMsgNum));
+      currentChatUID &&
+        GD.REQ_LAST_READ_MSG.invoke({ chatUID: currentChatUID }).then((result) => {
+          if (result) messageReadByUser = result;
+        });
     }, "ChatMessages");
 
     GD.S_GUI_MESSAGES_RENDERED.invoke();
@@ -44,7 +54,7 @@ const ChatMessages = () => {
 
   let msgs = null;
   let i = 0;
-  if (messages && messages.length > 0) msgs = messages.map((val, index) => <ChatMessage message={val} key={i++} index={index} />);
+  if (messages && messages.length > 0) msgs = messages.map((val, index) => <ChatMessage message={val} key={i++} />);
 
   return <ChatMessagesDiv>{msgs}</ChatMessagesDiv>;
 };
@@ -158,21 +168,6 @@ const TextItemCodeLineDiv = styled.div`
 
 const TextItemTextDiv = styled(TextBaseDiv)`
   margin: 0 15px 0 15px;
-`;
-
-const ChatMessageRead = styled.div`
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  margin-right: 5px;
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABUUlEQVRIie2SsUrDUBiFv5tcIejcgOAbtLZUFzex3XQQKnR08BkC2hcQxb6EjhmyiYtxEMRJkdCAg7vSWcEhudehsWmDqU0nwZ7xkP/Lf85/Ya65/rzErINVz7FFZF4JeH9qn27m+cbscMMH1jRYk3xZFF53OyUVqWugAjxHqN1JfqGK6m6npFA+sJpAtsL22VueXziBRp0nkFDLuBG2uv2q59gqin0QFdA9LVUzbHX73zMFK9J3IJSW8UGQwAedp/BgBA5JRTX36FagF5WMt0c/qLmH9wIWsj6MHjQfDpC8Im1pWBeR4Vc9x04rQf7kTwsfJsgeSZpm42Hv+PUnX8U6yjto7g/SrcwboAy6pz/VRrDf/chum4z9unmmIgha3b6WcQMIQZSxjJXUV80BXFSKwMcSDJNcOEvSksuP7ZOXMd9zbCLzEgAZ70wDn+uf6AselN1N/IXehQAAAABJRU5ErkJggg==);
-`;
-const ChatMessageDelivered = styled.div`
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  margin-right: 5px;
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA20lEQVRIie2UsQrCMBRFb4Ip/kD7FUoHacFJ1E0Hf9XFzc4uJRBw8BPET+iT1MFWQg21abrZO+aFe+57eQQYNcpXbCgjpVRUFMURACVJsqrP+VDmRJQxxpaMsalZ8wZIKUMiOgOYAbhprQ9m3WtEUspQa50BmFfm6zRN74MAupj3BnQ17wVwMbcC8jy/ABBCiF0cxw+zVm8L3g96FUJsm3ea+tqisiwnABZElCmlIh9zawfNEQDYcM6fLmNpBdjSVsdOyVsBlk7gmvwnAPj8LycACIJg75J81B/pBUirmXOOwxAnAAAAAElFTkSuQmCC);
 `;
 
 const TextItem = (params: { data: { content: string; type: string } }) => {
@@ -414,8 +409,8 @@ const MessageTime = (params: { message: MessageVO }) => {
   return <TimeDiv data-type="time">{time}</TimeDiv>;
 };
 
-const ChatMessage = (params: { message: MessageVO; index: number }) => {
-  const { message, index } = params;
+const ChatMessage = (params: { message: MessageVO }) => {
+  const { message } = params;
   let inner = null;
   if (message.sys) {
     if (message.type === "botMenu") inner = <MessageBotMenu data={message.sys} msg={message} />;
@@ -447,15 +442,35 @@ const ChatMessage = (params: { message: MessageVO; index: number }) => {
     );
 
   if (inner == null) inner = <ChatMessageText msg={message} />;
+
+  const usersWhoReadMessageCount = everyUserReadMessageID.filter((id) => {
+    if (id) {
+      return id >= message.id;
+    } else {
+      return null;
+    }
+  }).length;
+
+  const lastFullReadMessage = Math.max(...everyUserReadMessageID);
+
   return (
     <>
       {date}
       <ChatMessageDiv data-position={message.position} data-mine={message.mine} onClick={onMsgClick}>
         <MessageTime message={message} />
         {author}
-        {index === lastReadMessageIndex && message.mine && <ChatMessageRead />}
-        {(lastReadMessageIndex === null && <ChatMessageDelivered />) ||
-          (lastReadMessageIndex && index > lastReadMessageIndex && message.mine && <ChatMessageDelivered />)}
+
+        {(message.mine && usersWhoReadMessageCount && usersWhoReadMessageCount !== currentChatUsers.length && (
+          <ProgressBar total={currentChatUsers.length} progress={usersWhoReadMessageCount} />
+        )) ||
+          null}
+
+        {(message.mine && usersWhoReadMessageCount && usersWhoReadMessageCount === currentChatUsers.length && lastFullReadMessage === message.id && (
+          <MessageStatus status="read" />
+        )) ||
+          null}
+        {message.mine && !usersWhoReadMessageCount && <MessageStatus status="delivered" />}
+
         {inner}
         {avatar}
       </ChatMessageDiv>

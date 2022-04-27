@@ -19,7 +19,8 @@ class GD {
   static REQ_CURRENT_PROFILE: Req<void, ProfileVO | undefined | null> = new Req("REQ_CURRENT_PROFILE");
   static REQ_WS_STATUS: Req<void, number> = new Req("REQ_CURRENT_PROFILE");
   static REQ_TOASTS: Req<void, ToastVO[]> = new Req("REQ_TOASTS");
-  static REQ_LAST_READ_MSG: Req<{ chatUID: string }, { lastReadMsgNum: number } | undefined> = new Req("REQ_TOASTS");
+  static REQ_LAST_READ_MSG: Req<{ chatUID: string }, Map<string, { lastReadMsgID: number }> | undefined> = new Req("REQ_TOASTS");
+  static REQ_USERS_IN_CHAT: Req<{ chatUID: string }, Map<string, { active: boolean }> | undefined> = new Req("REQ_TOASTS");
 
   static S_FILE_DOWNLOAD_REQUEST: Signal<{ uid: string; name: string }> = new Signal();
   static S_FILE_STOP_UPLOAD: Signal<{ file: File; tempUID: string; error: boolean; chatUID: string }> = new Signal();
@@ -99,6 +100,8 @@ class GD {
   static S_LOGE: Signal<any> = new Signal();
   static S_LOG_AVAIALABLE: Signal<boolean> = new Signal();
 
-  static S_CHAT_STATUS_READ: Signal<{ chatUID: string; userUID: string; lastReadMsgNum: number }> = new Signal();
+  static S_CHAT_STATUS_READ: Signal<{ chatUID: string; userUID: string; lastReadMsgID: number }> = new Signal();
+
+  static S_CHAT_USER_STATUS_CHANGED: Signal<{ chatUID: string; userUID: string; active: boolean }> = new Signal();
 }
 export default GD;

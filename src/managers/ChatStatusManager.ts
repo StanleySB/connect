@@ -2,10 +2,9 @@ import GD from "../GD";
 
 class ChatStatusManager {
   private currentChatUID: string | null = null;
-  private currentUser: ProfileVO | null = null;
   private chatUsers: Map<string, Array<string>> = new Map();
-  private chatReadByUser: Map<string, Map<string, { lastReadMsgNum: number }> | undefined> = new Map();
-  private chatLastMsgNum: Map<string, number> = new Map();
+  private chatReadByUser: Map<string, Map<string, { lastReadMsgID: number }> | undefined> = new Map();
+  private chatLastMsgID: Map<string, number> = new Map();
 
   constructor() {
     GD.S_CHAT_OPENING.add((cvo) => {
@@ -14,11 +13,7 @@ class ChatStatusManager {
         this.currentChatUID,
         cvo.users.map((user) => user.uid)
       );
-      this.chatLastMsgNum.set(this.currentChatUID, cvo.message.num);
-    });
-
-    GD.S_AUTH_COMPLETE.add((data) => {
-      this.currentUser = data.profile;
+      this.chatLastMsgID.set(this.currentChatUID, cvo.message.id);
     });
 
     GD.S_WS_MSG.add((packet) => {
@@ -27,34 +22,51 @@ class ChatStatusManager {
           GD.S_CHAT_STATUS_READ.invoke({
             chatUID: packet.data?.chatUID,
             userUID: packet.data?.user_uid,
-            lastReadMsgNum: packet.data?.num,
+            lastReadMsgID: packet.data?.id,
           });
-        this.chatLastMsgNum.set(packet.data?.chatUID, packet.data?.num);
-        console.log(this.chatReadByUser, packet.data);
+        this.chatLastMsgID.set(packet.data?.chatUID, packet.data?.id);
 
+        GD.REQ_USERS_IN_CHAT.invoke({ chatUID: packet.data?.chatUID }).then((result) => {
+          result?.forEach((value, key) => {
+            if (value.active) {
+              GD.S_CHAT_STATUS_READ.invoke({
+                chatUID: packet.data?.chatUID,
+                userUID: key,
+                lastReadMsgID: packet.data?.id,
+              });
+            }
+          });
+        });
         return;
       }
 
-      packet.data &&
+      if (packet.method === "chatUserEnter") {
+        packet.data &&
+          packet.data?.stat.map((user: any) =>
+            GD.S_CHAT_STATUS_READ.invoke({
+              chatUID: packet.data?.chatUID,
+              userUID: user.uid,
+              lastReadMsgID: user.lastID || 0,
+            })
+          );
         GD.S_CHAT_STATUS_READ.invoke({
           chatUID: packet.data?.chatUID,
           userUID: packet.data?.userUid,
-          lastReadMsgNum: this.chatLastMsgNum.get(packet.data?.chatUID) || 0,
+          lastReadMsgID: this.chatLastMsgID.get(packet.data?.chatUID) || 0,
         });
-
-      console.log(this.chatReadByUser, packet.data, this.chatLastMsgNum);
+      }
     });
 
-    GD.REQ_LAST_READ_MSG.listener = (data: { chatUID: string }, callback: (value: { lastReadMsgNum: number } | undefined) => void) => {
-      this.chatReadByUser.get(data.chatUID)?.forEach((value, key) => {
-        if (this.currentUser?.uid !== key) {
-          callback(value);
-        }
-      });
+    GD.REQ_LAST_READ_MSG.listener = (data: { chatUID: string }, callback: (value: Map<string, { lastReadMsgID: number }> | undefined) => void) => {
+      callback(this.chatReadByUser.get(data.chatUID));
     };
 
-    GD.S_CHAT_STATUS_READ.add((data: { chatUID: string; userUID: string; lastReadMsgNum: number }) => {
-      this.chatReadByUser.set(data?.chatUID, new Map().set(data.userUID, { lastReadMsgNum: data.lastReadMsgNum }));
+    GD.S_CHAT_STATUS_READ.add((data: { chatUID: string; userUID: string; lastReadMsgID: number }) => {
+      if (this.chatReadByUser.get(data?.chatUID)) {
+        this.chatReadByUser.get(data?.chatUID)?.set(data.userUID, { lastReadMsgID: data.lastReadMsgID });
+        return;
+      }
+      this.chatReadByUser.set(data?.chatUID, new Map().set(data.userUID, { lastReadMsgNum: data.lastReadMsgID }));
     });
 
     GD.S_SERVICE_READY.invoke("chatStatusManager");
