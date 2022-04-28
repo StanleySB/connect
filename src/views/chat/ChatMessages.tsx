@@ -15,11 +15,13 @@ const ChatMessagesDiv = styled.div`
 `;
 let currentChatUID: string | null = null;
 let currentChatUsers: Array<string> = [];
+let currentChatUsersNameByUID: Map<string, string> = new Map();
 let everyUserReadMessageID: Array<number> = [];
 let messageReadByUser: Map<string, { lastReadMsgID: number }> = new Map();
 
 GD.S_CHAT_OPENING.add((data) => {
   currentChatUsers = data.users.map((user) => user.uid);
+  data.users.map((user) => currentChatUsersNameByUID.set(user.uid, user.name));
   messageReadByUser = new Map();
 });
 
@@ -452,6 +454,15 @@ const ChatMessage = (params: { message: MessageVO }) => {
   }).length;
 
   const lastFullReadMessage = Math.max(...everyUserReadMessageID);
+  let messageReadBy: Array<string> = [];
+
+  messageReadByUser.forEach((value, key) => {
+    const lastReadMsg = messageReadByUser.get(key)?.lastReadMsgID;
+    if (lastReadMsg && lastReadMsg >= message.id) {
+      const userName = currentChatUsersNameByUID.get(key);
+      userName && messageReadBy.push(userName);
+    }
+  });
 
   return (
     <>
@@ -461,7 +472,7 @@ const ChatMessage = (params: { message: MessageVO }) => {
         {author}
 
         {(message.mine && usersWhoReadMessageCount && usersWhoReadMessageCount !== currentChatUsers.length && (
-          <ProgressBar total={currentChatUsers.length} progress={usersWhoReadMessageCount} />
+          <ProgressBar total={currentChatUsers.length} progress={usersWhoReadMessageCount} chipText={`Read by: ${messageReadBy.join(", ")}`} />
         )) ||
           null}
 
