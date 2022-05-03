@@ -246,9 +246,7 @@ const Chat = (params: { sharedObject: SharedObjectVO }) => {
 
   useEffect(() => {
     GD.S_GUI_MESSAGES_RENDERED.add(() => {
-      if (body.current)
-        body.current.scrollTop =
-          body.current.scrollHeight - body.current.clientHeight;
+      if (body.current) body.current.scrollTop = body.current.scrollHeight - body.current.clientHeight;
       if (ref.current && ref.current.style.display === "none") openChat();
     }, "chat");
 
@@ -257,10 +255,8 @@ const Chat = (params: { sharedObject: SharedObjectVO }) => {
       if (!params.sharedObject.mobile) {
         ref.current.style.right = startWindowRPosition + "px";
         ref.current.style.bottom = startWindowBPosition + "px";
-        if (so.bottomOffset && !isNaN(so.bottomOffset))
-          startWindowBPosition = so.bottomOffset;
-        if (so.rightOffset && !isNaN(so.rightOffset))
-          startWindowRPosition = so.rightOffset;
+        if (so.bottomOffset && !isNaN(so.bottomOffset)) startWindowBPosition = so.bottomOffset;
+        if (so.rightOffset && !isNaN(so.rightOffset)) startWindowRPosition = so.rightOffset;
       }
       setupBounds();
     }
@@ -273,8 +269,7 @@ const Chat = (params: { sharedObject: SharedObjectVO }) => {
       openChat();
     }, "chat");
 
-    if (!params.sharedObject.messenger)
-      window.addEventListener("resize", onWindowResize);
+    if (!params.sharedObject.messenger) window.addEventListener("resize", onWindowResize);
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
@@ -304,20 +299,11 @@ const Chat = (params: { sharedObject: SharedObjectVO }) => {
     e.preventDefault();
   };
 
-  const head = params.sharedObject.headless ? null : (
-    <ChatHead
-      messenger={params.sharedObject.messenger}
-      onDoubleClick={headDoubleClick}
-    />
-  );
+  const head = params.sharedObject.headless ? null : <ChatHead messenger={params.sharedObject.messenger} onDoubleClick={headDoubleClick} />;
 
   if (params.sharedObject.messenger) {
     return (
-      <ChatWindow
-        id="DukascopyConnect"
-        data-messenger={params.sharedObject.messenger}
-        ref={ref}
-      >
+      <ChatWindow id="DukascopyConnect" data-messenger={params.sharedObject.messenger} ref={ref}>
         {head}
 
         <ChatBodyDiv ref={body} onDrop={onDrop} onDragOver={onDragOver}>
@@ -334,12 +320,7 @@ const Chat = (params: { sharedObject: SharedObjectVO }) => {
   }
 
   return (
-    <ChatWindow
-      id="DukascopyConnect"
-      data-mobile={params.sharedObject.mobile}
-      ref={ref}
-      onMouseDown={onMDown}
-    >
+    <ChatWindow id="DukascopyConnect" data-mobile={params.sharedObject.mobile} ref={ref} onMouseDown={onMDown}>
       {head}
       <ChatBodyDiv ref={body} onDrop={onDrop} onDragOver={onDragOver}>
         <ChatBodyBox>

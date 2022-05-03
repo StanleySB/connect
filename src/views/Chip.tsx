@@ -3,14 +3,16 @@ import styled from "styled-components";
 
 const ChipDiv = styled.div`
   position: relative;
+  z-index: 10;
 `;
 const ChipText = styled.div`
   position: absolute;
-  top: -30px;
+  top: 10px;
   background: gray;
   border-radius: 5px;
   padding: 5px 5px;
-  max-width: 200px;
+  max-width: 400px;
+  width: max-content;
 `;
 
 const Chip = (params: { text: string; open: boolean }) => {
