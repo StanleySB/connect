@@ -27,8 +27,8 @@ class ChatUsersStatusManager {
           })
         );
       }
-      // TODO: get information about method names
-      if (packet.method === "chatUserLeave" && packet.data) {
+
+      if (packet.method === "chatUserExit" && packet.data) {
         GD.S_USER_IN_CHAT_STATUS_CHANGED.invoke({
           chatUID: packet.data?.chatUID,
           userUID: packet.data?.userUid,

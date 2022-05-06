@@ -48,7 +48,7 @@ const ChatUsersStatusPanel = (params: { users: Array<UserVO>; onlineUsers: Map<s
     <ChatUsersStatusPanelDiv>
       {users.map((user) => {
         return (
-          <React.Fragment key={user.uid + isChipOpen}>
+          <React.Fragment key={user.uid + isChipOpen + onlineUsers.values}>
             <UserDiv
               style={user.avatar ? { backgroundImage: `url(${user.avatar})` } : {}}
               data-online={onlineUsers.get(user.uid)?.online}
