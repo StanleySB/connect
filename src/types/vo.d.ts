@@ -246,3 +246,10 @@ declare interface MemberVO {
   uid: string;
   username: string;
 }
+
+declare interface DepartamentVO {
+  id: number; // string from server
+  me: number; // string from server
+  short: string;
+  title: string;
+}

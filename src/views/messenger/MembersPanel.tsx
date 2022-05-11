@@ -42,9 +42,18 @@ const MemberItemDiv = styled.div`
     background-color: #00000096;
     border-left: 4px solid #e91e63;
   }
-  color: #9ab2d2;
-  &[data-unread="true"] {
-    color: #ffffff;
+`;
+
+const MemberItemMsgBlockDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+  overflow: hidden;
+  flex-grow: 1;
+  font-size: 12px;
+  color: #ffffff;
+  & > div {
+    margin-top: 2px;
   }
 `;
 
@@ -53,11 +62,11 @@ const MemberItemTitleDiv = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-left: 20px;
+  color: #9ab2d2;
 `;
 
-const MemberItem = (params: { memberVO: MemberVO }) => {
-  const { name, uid } = params.memberVO;
+const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO }) => {
+  const { name, uid, city } = params.memberVO;
 
   const onChatClick = (e: React.MouseEvent) => {
     GD.S_CHAT_OPEN_REQUEST.invoke({ userUID: [uid] });
@@ -67,7 +76,11 @@ const MemberItem = (params: { memberVO: MemberVO }) => {
     <>
       <MemberItemDiv onClick={onChatClick}>
         <Avatar user={name} avatar="" />
-        <MemberItemTitleDiv>{name}</MemberItemTitleDiv>
+        <MemberItemMsgBlockDiv>
+          <MemberItemTitleDiv>{name}</MemberItemTitleDiv>
+          <div>City: {city}</div>
+          <div>Departament: {params.departament?.title}</div>
+        </MemberItemMsgBlockDiv>
       </MemberItemDiv>
     </>
   );
@@ -75,9 +88,12 @@ const MemberItem = (params: { memberVO: MemberVO }) => {
 
 const MembersPanel = () => {
   const [members, setMembers] = useState<MemberVO[]>([]);
+  const [departaments, setDepartaments] = useState<Map<number, DepartamentVO>>(new Map());
   const [loadMoreMembers, setLoadMoreMembers] = useState(false);
   const [page, setPage] = useState(1);
   const membersPageCount = 50;
+
+  console.log(members);
 
   const slicedMembers = members.slice(0, membersPageCount * page);
 
@@ -91,8 +107,13 @@ const MembersPanel = () => {
       setMembers([...members]);
     }, "memberPanel");
 
+    GD.S_DEPARTAMENTS_READY.add((departaments) => {
+      setDepartaments(departaments);
+    }, "memberPanel");
+
     return () => {
       GD.S_MEMBERS_READY.clearContext("memberPanel");
+      GD.S_DEPARTAMENTS_READY.clearContext("memberPanel");
     };
   }, []);
 
@@ -107,7 +128,7 @@ const MembersPanel = () => {
       <LatestBoxDiv onScroll={handleScroll}>
         <LatestBoxContainerDiv>
           {slicedMembers.map((val, index) => (
-            <MemberItem memberVO={val} key={index} />
+            <MemberItem memberVO={val} key={index} departament={departaments.get(val.department_id)} />
           ))}
         </LatestBoxContainerDiv>
       </LatestBoxDiv>

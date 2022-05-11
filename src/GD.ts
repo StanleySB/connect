@@ -104,5 +104,6 @@ class GD {
   static S_LOG_AVAIALABLE: Signal<boolean> = new Signal();
 
   static S_MEMBERS_READY: Signal<MemberVO[]> = new Signal();
+  static S_DEPARTAMENTS_READY: Signal<Map<number, DepartamentVO>> = new Signal();
 }
 export default GD;
