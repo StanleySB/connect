@@ -9,14 +9,14 @@ import GD from "./GD";
 import { Images } from "./managers/Images";
 import ReactDOM from "react-dom";
 import { Files } from "./managers/Files";
+import { FilePreviewManager } from "./managers/FilePreviewManager";
 import Logger from "./managers/Logger";
 import preval from "preval.macro";
 import Latest from "./managers/Latest";
 import Messages from "./managers/Messages";
 import Users from "./managers/Users";
 import ToastManager from "./managers/ToastManager";
-import ChatStatusManager from "./managers/ChatStatusManager";
-import ChatUsersStatusManager from "./managers/ChatUsersStatusManager";
+import MemebersManager from "./managers/MemebersManager";
 import Company from "./managers/Company";
 import CallManager from "./managers/CallManager";
 import { Services } from "./utils/Services";
@@ -30,6 +30,7 @@ class Main {
       Config,
       Images,
       Files,
+      FilePreviewManager,
       WS,
       HTTP,
       Auth,
@@ -40,8 +41,7 @@ class Main {
       Company,
       ToastManager,
       Users,
-      ChatStatusManager,
-      ChatUsersStatusManager,
+      MemebersManager,
     ];
 
     let done = 0;

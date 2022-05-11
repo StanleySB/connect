@@ -285,7 +285,9 @@ const AuthPanel = () => {
         <AuthFormContainer>
           <AuthInputContainer>
             <AuthInput ref={login} type="number" name="code" placeholder="Code" />
-            <AuthSwitch onClick={() => setRemember(!remember)}>Remember Me</AuthSwitch>
+            <AuthSwitch onClick={() => setRemember(!remember)} data-selected={remember}>
+              Remember Me
+            </AuthSwitch>
             {errorMsg && <AuthErrorDiv>{errorMsg}</AuthErrorDiv>}
           </AuthInputContainer>
           <AuthButtonContainer>

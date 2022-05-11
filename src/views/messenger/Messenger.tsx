@@ -7,6 +7,7 @@ import CallDialogs from "../call/CallDialogs";
 import Chat from "../chat/Chat";
 import Lightbox from "../Lightbox";
 import LatestPanel from "./LatestPanel";
+import MembersPanel from "./MembersPanel";
 import MenuPanel from "./MenuPanel";
 
 const MessengerDiv = styled.div`
@@ -59,6 +60,7 @@ const Messenger = (params: { sharedObject: SharedObjectVO }) => {
         <Lightbox />
         <MessengerBoxDiv>
           <MenuPanel />
+          <MembersPanel />
           <LatestPanel />
           <Chat sharedObject={params.sharedObject} />
           <Call />

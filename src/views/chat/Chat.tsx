@@ -292,7 +292,7 @@ const Chat = (params: { sharedObject: SharedObjectVO }) => {
       const file = ev.dataTransfer.files.item(i);
       if (file) f.push(file);
     }
-    GD.S_CHAT_ATTACH_FILE_REQUEST.invoke(f);
+    GD.S_FILE_PREVIEW_ATTACH.invoke(f);
   };
 
   const onDragOver = (e: React.DragEvent) => {

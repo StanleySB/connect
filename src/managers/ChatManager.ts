@@ -24,15 +24,6 @@ class ChatManager {
     });
 
     GD.S_CHAT_OPENING.add((cvo) => {
-      if (this.chat) {
-        GD.S_WS_SEND.invoke({
-          method: "chatUserExit",
-          data: {
-            chatUID: this.chat?.uid,
-          },
-        });
-      }
-
       this.chat = cvo;
       GD.S_CHAT_OPENED.invoke(this.chat);
 
@@ -146,24 +137,9 @@ class ChatManager {
       });
     });
 
-    GD.S_CHAT_ATTACH_FILE_REQUEST.add((filelist: File[] | null) => {
-      // REQUEST FILE ATTACH
-      GD.S_LOG.invoke(filelist);
-      if (!filelist) return;
-
-      let l = filelist.length;
-
+    GD.S_CHAT_FILE_SEND_REQUEST.add((chatUID: string) => {
       if (!this.chat) return;
-
-      GD.S_LOG.invoke(filelist);
-
-      for (let i = 0; i < l; i++) {
-        const tempUID: string = btoa(Math.random() * 10000 + "_" + +new Date());
-        const file = filelist[i];
-        if (!file) continue;
-        this.uploadingFiles.set(tempUID, { file: file, tempUID: tempUID, chatUID: this.chat.uid, status: "start", started: +new Date() });
-        this.uploadFile(filelist[i], tempUID);
-      }
+      this.getFilesByChatUID(chatUID);
       this.fireFiles();
     });
 
@@ -224,6 +200,11 @@ class ChatManager {
     });
   };
 
+  private async getFilesByChatUID(chatUID: string) {
+    await GD.REQ_FILE_PREVIEW_GET_BY_UID.invoke(chatUID).then((result) => result && (this.uploadingFiles = result));
+    this.uploadingFiles.forEach((file) => this.uploadFile(file.file, file.tempUID));
+  }
+
   private async uploadFile(file: File | null, tempUID: string) {
     if (!file) return;
 
@@ -240,6 +221,7 @@ class ChatManager {
       }
 
       let key = this.chat.securityKey;
+      GD.S_FILE_PREVIEW_DELETE_ALL.invoke(this.chat.uid);
       error = !(await GD.REQ_IMAGE_UPLOAD.invoke({ file: file, chatUID: this.chat.uid, secKey: key }));
     } else {
       if (file.size > 1024 * 1024 * 25) {
@@ -247,6 +229,7 @@ class ChatManager {
         this.onFileUploaded(tempUID, true);
         return;
       }
+      GD.S_FILE_PREVIEW_DELETE_ALL.invoke(this.chat.uid);
       error = !(await GD.REQ_FILE_UPLOAD.invoke({ file: file, chatUID: this.chat.uid }));
     }
 

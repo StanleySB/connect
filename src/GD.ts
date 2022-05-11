@@ -18,15 +18,17 @@ class GD {
   static REQ_CURRENT_CHAT: Req<void, ChatVO> = new Req("REQ_CURRENT_CHAT");
   static REQ_CURRENT_PROFILE: Req<void, ProfileVO | undefined | null> = new Req("REQ_CURRENT_PROFILE");
   static REQ_WS_STATUS: Req<void, number> = new Req("REQ_CURRENT_PROFILE");
+  static REQ_FILE_PREVIEW_GET_BY_UID: Req<string, Map<string, UploadingFileVO> | undefined> = new Req("REQ_FILE_PREVIEW_GET_BY_UID");
   static REQ_TOASTS: Req<void, ToastVO[]> = new Req("REQ_TOASTS");
-  static REQ_LAST_READ_MSG: Req<{ chatUID: string }, Map<string, { lastReadMsgID: number }> | undefined> = new Req("REQ_LAST_READ_MSG");
-  static REQ_USERS_IN_CHAT: Req<{ chatUID: string }, Map<string, { active: boolean }> | undefined> = new Req("REQ_USERS_IN_CHAT");
-  static REQ_USERS_STATUS: Req<void, Map<string, { online: boolean }>> = new Req("REQ_USERS_STATUS");
 
   static S_FILE_DOWNLOAD_REQUEST: Signal<{ uid: string; name: string }> = new Signal();
   static S_FILE_STOP_UPLOAD: Signal<{ file: File; tempUID: string; error: boolean; chatUID: string }> = new Signal();
   static S_FILE_START_UPLOAD: Signal<{ file: File; tempUID: string; chatUID: string }> = new Signal();
   static S_FILE_UPLOADING_LIST_UPDATED: Signal<UploadingFileVO[]> = new Signal();
+
+  static S_FILE_PREVIEW_ATTACH: Signal<File[] | null> = new Signal();
+  static S_FILE_PREVIEW_DELETE: Signal<string> = new Signal();
+  static S_FILE_PREVIEW_DELETE_ALL: Signal<string> = new Signal();
 
   static S_SERVICE_READY: Signal<string> = new Signal();
 
@@ -44,8 +46,8 @@ class GD {
   static S_CHAT_MESSAGES: Signal<{ chatUID: string; msgs: MessageVO[] }> = new Signal();
   static S_CHAT_MESSAGE_SEND_REQUEST: Signal<string> = new Signal();
   static S_CHAT_BOT_COMMAND_SEND_REQUEST: Signal<{ title: string; action: string; actionData: string | null; botUID: string }> = new Signal();
-  static S_CHAT_ATTACH_FILE_REQUEST: Signal<File[] | null> = new Signal();
-  static S_CHAT_OPEN_REQUEST: Signal<{ chatUID?: string; userUID?: string }> = new Signal(); // UID
+  static S_CHAT_FILE_SEND_REQUEST: Signal<string> = new Signal();
+  static S_CHAT_OPEN_REQUEST: Signal<{ chatUID?: string; userUID?: Array<string> }> = new Signal(); // UID
   static S_CHAT_OPENING: Signal<ChatVO> = new Signal(); // UID
   static S_CHAT_SCREENSHOT_SEND_REQUEST: Signal<void> = new Signal(); // UID
 
@@ -54,6 +56,9 @@ class GD {
 
   static S_LATEST_READY: Signal<ChatVO[]> = new Signal();
   static S_LATEST_REQUEST: Signal<{ viaServer?: boolean }> = new Signal();
+
+  static S_TOAST: Signal<string> = new Signal();
+  static S_TOAST_DELETE: Signal<string> = new Signal();
 
   static S_IMAGE_REQUEST: Signal<{ uid: string; thumb: boolean; chatUID?: string }> = new Signal();
   static S_IMAGE_READY: Signal<{ uid: string; b64: string; thumb: boolean }> = new Signal();
@@ -74,9 +79,6 @@ class GD {
   static S_WS_CLOSED: Signal<void> = new Signal();
   static S_WS_MSG_SENT_VIA_HTTP: Signal<{ num: number; id: number; chatUID: string; text: string }> = new Signal();
   static S_ALERT_ERROR: Signal<string> = new Signal();
-
-  static S_TOAST: Signal<string> = new Signal();
-  static S_TOAST_DELETE: Signal<string> = new Signal();
 
   static S_GUI_MESSAGES_RENDERED: Signal<void> = new Signal();
   static S_GUI_CLOSE_CHAT: Signal<{ uid?: string } | null> = new Signal();
@@ -101,9 +103,6 @@ class GD {
   static S_LOGE: Signal<any> = new Signal();
   static S_LOG_AVAIALABLE: Signal<boolean> = new Signal();
 
-  static S_CHAT_STATUS_READ: Signal<{ chatUID: string; userUID: string; lastReadMsgID: number }> = new Signal();
-
-  static S_USER_IN_CHAT_STATUS_CHANGED: Signal<{ chatUID: string; userUID: string; active: boolean }> = new Signal();
-  static S_CHAT_USER_STATUS_CHANGED: Signal<{ userUID: string; online: boolean }> = new Signal();
+  static S_MEMBERS_READY: Signal<MemberVO[]> = new Signal();
 }
 export default GD;

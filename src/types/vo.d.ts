@@ -231,3 +231,18 @@ declare interface ToastVO {
   created: number;
   tempUID: string;
 }
+
+declare interface MemberVO {
+  LDAPname: string;
+  auditor: number; // string from server
+  city: string;
+  companyPhone: number; // string from server
+  department_id: number; // string from server
+  id: number; // string from server
+  name: string;
+  points: Array<number>; // string from server
+  status: string;
+  type: string;
+  uid: string;
+  username: string;
+}
