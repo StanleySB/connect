@@ -17,6 +17,8 @@ import Messages from "./managers/Messages";
 import Users from "./managers/Users";
 import ToastManager from "./managers/ToastManager";
 import MemebersManager from "./managers/MemebersManager";
+import ChatStatusManager from "./managers/ChatStatusManager";
+import ChatUsersStatusManager from "./managers/ChatUsersStatusManager";
 import Company from "./managers/Company";
 import CallManager from "./managers/CallManager";
 import { Services } from "./utils/Services";
@@ -42,6 +44,8 @@ class Main {
       ToastManager,
       Users,
       MemebersManager,
+      ChatStatusManager,
+      ChatUsersStatusManager,
     ];
 
     let done = 0;

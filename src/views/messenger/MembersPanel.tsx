@@ -4,7 +4,7 @@ import GD from "../../GD";
 import Avatar from "../Avatar";
 import CSS from "../CSS";
 
-const LatestDiv = styled.div`
+const MemberDiv = styled.div`
   color: ${CSS.latestColor};
   font-family: "Open Sans", sans-serif;
   display: flex;
@@ -17,17 +17,40 @@ const LatestDiv = styled.div`
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
 `;
 
-const LatestBoxDiv = styled.div`
+const MemberBoxDiv = styled.div`
   color: ${CSS.latestColor};
   position: relative;
   overflow: auto;
   flex-grow: 1;
 `;
 
-const LatestBoxContainerDiv = styled.div`
+const MemberBoxContainerDiv = styled.div`
   position: absolute;
   color: ${CSS.latestColor};
   width: 100%;
+  margin-top: 50px;
+`;
+
+const MemberSearchBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 5px;
+  border-radius: 10px;
+  position: fixed;
+  background-color: #252833;
+  z-index: 10;
+`;
+
+const MemberSearchInput = styled.input`
+  background: none;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 5px;
+  outline: none;
+  color: #ffffff;
+  min-width: 230px;
 `;
 
 const MemberItemDiv = styled.div`
@@ -51,7 +74,7 @@ const MemberItemMsgBlockDiv = styled.div`
   overflow: hidden;
   flex-grow: 1;
   font-size: 12px;
-  color: #ffffff;
+  color: #9ab2d2;
   & > div {
     margin-top: 2px;
   }
@@ -62,11 +85,11 @@ const MemberItemTitleDiv = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #9ab2d2;
+  color: #ffffff;
 `;
 
 const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO }) => {
-  const { name, uid, city } = params.memberVO;
+  const { name, uid, city, companyPhone } = params.memberVO;
 
   const onChatClick = (e: React.MouseEvent) => {
     GD.S_CHAT_OPEN_REQUEST.invoke({ userUID: [uid] });
@@ -80,6 +103,7 @@ const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO })
           <MemberItemTitleDiv>{name}</MemberItemTitleDiv>
           <div>City: {city}</div>
           <div>Departament: {params.departament?.title}</div>
+          <div>Company Phone: {companyPhone}</div>
         </MemberItemMsgBlockDiv>
       </MemberItemDiv>
     </>
@@ -88,14 +112,14 @@ const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO })
 
 const MembersPanel = () => {
   const [members, setMembers] = useState<MemberVO[]>([]);
+  const [foundedMembers, setFoundedMembers] = useState<MemberVO[]>([]);
   const [departaments, setDepartaments] = useState<Map<number, DepartamentVO>>(new Map());
   const [loadMoreMembers, setLoadMoreMembers] = useState(false);
   const [page, setPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
   const membersPageCount = 50;
 
-  console.log(members);
-
-  const slicedMembers = members.slice(0, membersPageCount * page);
+  const slicedMembers = foundedMembers.slice(0, membersPageCount * page);
 
   const handleScroll = (event: any) => {
     if (event.target.scrollTop + event.target.clientHeight + 100 < event.target.scrollHeight) return;
@@ -111,6 +135,8 @@ const MembersPanel = () => {
       setDepartaments(departaments);
     }, "memberPanel");
 
+    GD.S_MEMBERS_REQUEST.invoke();
+
     return () => {
       GD.S_MEMBERS_READY.clearContext("memberPanel");
       GD.S_DEPARTAMENTS_READY.clearContext("memberPanel");
@@ -123,16 +149,30 @@ const MembersPanel = () => {
     setLoadMoreMembers(false);
   }, [loadMoreMembers, page]);
 
+  useEffect(() => {
+    if (searchText.length >= 3) {
+      setFoundedMembers(members.filter((member) => member.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())));
+      setPage(1);
+    } else {
+      setFoundedMembers(members);
+      setPage(1);
+    }
+  }, [searchText, members]);
+
   return (
-    <LatestDiv>
-      <LatestBoxDiv onScroll={handleScroll}>
-        <LatestBoxContainerDiv>
+    <MemberDiv>
+      <MemberBoxDiv onScroll={handleScroll}>
+        <MemberSearchBox>
+          Find Member: <MemberSearchInput value={searchText} onChange={(e) => setSearchText(e.target.value)} />
+        </MemberSearchBox>
+        <MemberBoxContainerDiv>
           {slicedMembers.map((val, index) => (
             <MemberItem memberVO={val} key={index} departament={departaments.get(val.department_id)} />
           ))}
-        </LatestBoxContainerDiv>
-      </LatestBoxDiv>
-    </LatestDiv>
+          {foundedMembers.length === 0 && "No Members found"}
+        </MemberBoxContainerDiv>
+      </MemberBoxDiv>
+    </MemberDiv>
   );
 };
 export default MembersPanel;

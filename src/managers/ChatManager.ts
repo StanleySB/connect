@@ -24,6 +24,15 @@ class ChatManager {
     });
 
     GD.S_CHAT_OPENING.add((cvo) => {
+      if (this.chat) {
+        GD.S_WS_SEND.invoke({
+          method: "chatUserExit",
+          data: {
+            chatUID: this.chat?.uid,
+          },
+        });
+      }
+
       this.chat = cvo;
       GD.S_CHAT_OPENED.invoke(this.chat);
 

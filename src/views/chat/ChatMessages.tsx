@@ -4,6 +4,8 @@ import GD from "../../GD";
 import { Services } from "../../utils/Services";
 import Avatar from "../Avatar";
 import CSS from "../CSS";
+import MessageStatus from "../MessageStatus";
+import ProgressBar from "../ProgressBar";
 import { MessageBotCommand, MessageBotMenu, MessageFile, MessageImage } from "./ChatInnerMessages";
 
 const ChatMessagesDiv = styled.div`
@@ -12,7 +14,16 @@ const ChatMessagesDiv = styled.div`
   padding: 10px;
 `;
 let currentChatUID: string | null = null;
-GD.S_CHAT_OPENING.add((data) => {});
+let currentChatUsers: Array<string> = [];
+let currentChatUsersNameByUID: Map<string, string> = new Map();
+let everyUserReadMessageID: Array<number> = [];
+let messageReadByUser: Map<string, { lastReadMsgID: number }> = new Map();
+
+GD.S_CHAT_OPENING.add((data) => {
+  currentChatUsers = data.users.map((user) => user.uid);
+  data.users.map((user) => currentChatUsersNameByUID.set(user.uid, user.name));
+  messageReadByUser = new Map();
+});
 
 GD.S_CHAT_OPEN_REQUEST.add((data) => {
   if (data.chatUID) currentChatUID = data.chatUID;
@@ -20,16 +31,26 @@ GD.S_CHAT_OPEN_REQUEST.add((data) => {
 
 const ChatMessages = () => {
   const [messages, setMessages] = useState<MessageVO[]>([]);
+  everyUserReadMessageID = currentChatUsers.map((user) => messageReadByUser.get(user)?.lastReadMsgID || 0);
+
   useEffect(() => {
     GD.S_CHAT_MESSAGES.add((data) => {
       if (currentChatUID !== data.chatUID) return;
       setMessages([...data.msgs]);
     }, "ChatMessages");
 
+    GD.S_CHAT_STATUS_READ.add(() => {
+      currentChatUID &&
+        GD.REQ_LAST_READ_MSG.invoke({ chatUID: currentChatUID }).then((result) => {
+          if (result) messageReadByUser = result;
+        });
+    }, "ChatMessages");
+
     GD.S_GUI_MESSAGES_RENDERED.invoke();
 
     return () => {
       GD.S_CHAT_MESSAGES.clearContext("ChatMessages");
+      GD.S_CHAT_STATUS_READ.clearContext("ChatMessages");
     };
   });
 
@@ -430,12 +451,44 @@ const ChatMessage = (params: { message: MessageVO }) => {
     );
 
   if (inner == null) inner = <ChatMessageText msg={message} />;
+
+  const usersWhoReadMessageCount = everyUserReadMessageID.filter((id) => {
+    if (id) {
+      return id >= message.id;
+    } else {
+      return null;
+    }
+  }).length;
+
+  const lastFullReadMessage = Math.max(...everyUserReadMessageID);
+  let messageReadBy: Array<string> = [];
+
+  messageReadByUser.forEach((value, key) => {
+    const lastReadMsg = messageReadByUser.get(key)?.lastReadMsgID;
+    if (lastReadMsg && lastReadMsg >= message.id) {
+      const userName = currentChatUsersNameByUID.get(key);
+      userName && messageReadBy.push(userName);
+    }
+  });
+
   return (
     <>
       {date}
       <ChatMessageDiv data-position={message.position} data-mine={message.mine} onClick={onMsgClick}>
         <MessageTime message={message} />
         {author}
+
+        {(message.mine && usersWhoReadMessageCount && usersWhoReadMessageCount !== currentChatUsers.length && (
+          <ProgressBar total={currentChatUsers.length} progress={usersWhoReadMessageCount} chipText={`Read by: ${messageReadBy.join(", ")}`} />
+        )) ||
+          null}
+
+        {(message.mine && usersWhoReadMessageCount && usersWhoReadMessageCount === currentChatUsers.length && lastFullReadMessage === message.id && (
+          <MessageStatus status="read" />
+        )) ||
+          null}
+        {message.mine && !usersWhoReadMessageCount && <MessageStatus status="delivered" />}
+
         {inner}
         {avatar}
       </ChatMessageDiv>

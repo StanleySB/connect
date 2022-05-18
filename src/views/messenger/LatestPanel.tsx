@@ -141,34 +141,27 @@ const LatestItemMsgImgDiv = styled.div`
   }
 `;
 
-const LatestItemMsgImg = memo(
-  (params: { message: MessageVO; author?: string | null | undefined }) => {
-    // load image
-    const tmp = params.message.sys?.additionalData.split(",");
-    const imgUID = tmp[0];
-    const chatUID = params.message.chatUID;
-    const [b64, setB64] = useState<string | null>(null);
+const LatestItemMsgImg = memo((params: { message: MessageVO; author?: string | null | undefined }) => {
+  // load image
+  const tmp = params.message.sys?.additionalData.split(",");
+  const imgUID = tmp[0];
+  const chatUID = params.message.chatUID;
+  const [b64, setB64] = useState<string | null>(null);
 
-    useEffect(() => {
-      GD.S_IMAGE_REQUEST.invoke({ uid: imgUID, thumb: true, chatUID: chatUID });
-      GD.S_IMAGE_READY.add((data) => {
-        if (data.uid !== imgUID || !data.thumb) return;
-        console.log("img uid", data.uid);
-        setB64(data.b64);
-      }, "li" + imgUID);
-      return () => {
-        GD.S_IMAGE_READY.clearContext("li" + imgUID);
-      };
-    }, [imgUID, chatUID]);
+  useEffect(() => {
+    GD.S_IMAGE_REQUEST.invoke({ uid: imgUID, thumb: true, chatUID: chatUID });
+    GD.S_IMAGE_READY.add((data) => {
+      if (data.uid !== imgUID || !data.thumb) return;
+      console.log("img uid", data.uid);
+      setB64(data.b64);
+    }, "li" + imgUID);
+    return () => {
+      GD.S_IMAGE_READY.clearContext("li" + imgUID);
+    };
+  }, [imgUID, chatUID]);
 
-    return (
-      <LatestItemMsgImgDiv
-        data-author={params.author}
-        style={{ backgroundImage: `url(${b64}` }}
-      ></LatestItemMsgImgDiv>
-    );
-  }
-);
+  return <LatestItemMsgImgDiv data-author={params.author} style={{ backgroundImage: `url(${b64}` }}></LatestItemMsgImgDiv>;
+});
 
 const LatestItem = (params: { chatVO: ChatVO }) => {
   const { title, uid, message, time, selected, author, unread } = params.chatVO;
@@ -182,13 +175,8 @@ const LatestItem = (params: { chatVO: ChatVO }) => {
   let msg = null;
   if (message) {
     if (message.type === "img") {
-      msg = (
-        <LatestItemMsgImg author={author} message={message}></LatestItemMsgImg>
-      );
-    } else
-      msg = (
-        <LatestItemMsgDiv data-author={author}>{message.text}</LatestItemMsgDiv>
-      );
+      msg = <LatestItemMsgImg author={author} message={message}></LatestItemMsgImg>;
+    } else msg = <LatestItemMsgDiv data-author={author}>{message.text}</LatestItemMsgDiv>;
   }
 
   let date = null;
@@ -199,16 +187,10 @@ const LatestItem = (params: { chatVO: ChatVO }) => {
   return (
     <>
       {date}
-      <LatestItemDiv
-        data-unread={unread > 0}
-        data-selected={selected}
-        onClick={onChatClick}
-      >
+      <LatestItemDiv data-unread={unread > 0} data-selected={selected} onClick={onChatClick}>
         <Avatar user="" avatar="" />
         <LatestItemMsgBlockDiv>
-          <LatestItemTitleDiv data-unread={unread > 0}>
-            {title}
-          </LatestItemTitleDiv>
+          <LatestItemTitleDiv data-unread={unread > 0}>{title}</LatestItemTitleDiv>
           {msg}
         </LatestItemMsgBlockDiv>
         <LatestItemTimeDiv data-unread={unread}>{time}</LatestItemTimeDiv>
@@ -223,6 +205,7 @@ const LatestPanel = () => {
     GD.S_LATEST_READY.add((latest) => {
       setLatest([...latest]);
     }, "latestPanel");
+    GD.S_LATEST_REQUEST.invoke({ viaServer: false });
     GD.S_LATEST_REQUEST.invoke({ viaServer: true });
     return () => {
       GD.S_LATEST_READY.clearContext("latestPanel");
