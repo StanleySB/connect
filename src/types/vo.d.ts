@@ -253,3 +253,9 @@ declare interface DepartamentVO {
   short: string;
   title: string;
 }
+
+declare interface FoundedItemVO {
+  latests: Array<ChatVO>;
+  members: Array<MemberVO>;
+  departaments: Map<number, DepartamentVO>;
+}

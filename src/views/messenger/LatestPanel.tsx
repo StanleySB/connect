@@ -15,6 +15,8 @@ const LatestDiv = styled.div`
   margin-right: 20px;
   /*background-color: rgba(0,0,0,.3);
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
+  height: 100%;
+  margin-top: 50px;
 `;
 
 const LatestBoxDiv = styled.div`
@@ -163,7 +165,7 @@ const LatestItemMsgImg = memo((params: { message: MessageVO; author?: string | n
   return <LatestItemMsgImgDiv data-author={params.author} style={{ backgroundImage: `url(${b64}` }}></LatestItemMsgImgDiv>;
 });
 
-const LatestItem = (params: { chatVO: ChatVO }) => {
+export const LatestItem = (params: { chatVO: ChatVO }) => {
   const { title, uid, message, time, selected, author, unread } = params.chatVO;
   const onChatClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {

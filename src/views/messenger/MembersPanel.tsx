@@ -15,6 +15,8 @@ const MemberDiv = styled.div`
   margin-right: 20px;
   /*background-color: rgba(0,0,0,.3);
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
+  height: 100%;
+  margin-top: 50px;
 `;
 
 const MemberBoxDiv = styled.div`
@@ -28,29 +30,6 @@ const MemberBoxContainerDiv = styled.div`
   position: absolute;
   color: ${CSS.latestColor};
   width: 100%;
-  margin-top: 50px;
-`;
-
-const MemberSearchBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 5px;
-  border-radius: 10px;
-  position: fixed;
-  background-color: #252833;
-  z-index: 10;
-`;
-
-const MemberSearchInput = styled.input`
-  background: none;
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 5px;
-  outline: none;
-  color: #ffffff;
-  min-width: 230px;
 `;
 
 const MemberItemDiv = styled.div`
@@ -88,7 +67,7 @@ const MemberItemTitleDiv = styled.div`
   color: #ffffff;
 `;
 
-const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO }) => {
+export const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO }) => {
   const { name, uid, city, companyPhone } = params.memberVO;
 
   const onChatClick = (e: React.MouseEvent) => {
@@ -112,14 +91,12 @@ const MemberItem = (params: { memberVO: MemberVO; departament?: DepartamentVO })
 
 const MembersPanel = () => {
   const [members, setMembers] = useState<MemberVO[]>([]);
-  const [foundedMembers, setFoundedMembers] = useState<MemberVO[]>([]);
   const [departaments, setDepartaments] = useState<Map<number, DepartamentVO>>(new Map());
   const [loadMoreMembers, setLoadMoreMembers] = useState(false);
   const [page, setPage] = useState(1);
-  const [searchText, setSearchText] = useState("");
   const membersPageCount = 50;
 
-  const slicedMembers = foundedMembers.slice(0, membersPageCount * page);
+  const slicedMembers = members.slice(0, membersPageCount * page);
 
   const handleScroll = (event: any) => {
     if (event.target.scrollTop + event.target.clientHeight + 100 < event.target.scrollHeight) return;
@@ -149,27 +126,13 @@ const MembersPanel = () => {
     setLoadMoreMembers(false);
   }, [loadMoreMembers, page]);
 
-  useEffect(() => {
-    if (searchText.length >= 3) {
-      setFoundedMembers(members.filter((member) => member.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())));
-      setPage(1);
-    } else {
-      setFoundedMembers(members);
-      setPage(1);
-    }
-  }, [searchText, members]);
-
   return (
     <MemberDiv>
       <MemberBoxDiv onScroll={handleScroll}>
-        <MemberSearchBox>
-          Find Member: <MemberSearchInput value={searchText} onChange={(e) => setSearchText(e.target.value)} />
-        </MemberSearchBox>
         <MemberBoxContainerDiv>
           {slicedMembers.map((val, index) => (
             <MemberItem memberVO={val} key={index} departament={departaments.get(val.department_id)} />
           ))}
-          {foundedMembers.length === 0 && "No Members found"}
         </MemberBoxContainerDiv>
       </MemberBoxDiv>
     </MemberDiv>

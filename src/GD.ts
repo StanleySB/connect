@@ -113,5 +113,8 @@ class GD {
 
   static S_USER_IN_CHAT_STATUS_CHANGED: Signal<{ chatUID: string; userUID: string; active: boolean }> = new Signal();
   static S_CHAT_USER_STATUS_CHANGED: Signal<{ userUID: string; online: boolean }> = new Signal();
+
+  static S_MESSENGER_SEARCH_REQUEST: Signal<string> = new Signal();
+  static S_MESSENGER_SEARCH_READY: Signal<FoundedItemVO> = new Signal();
 }
 export default GD;
