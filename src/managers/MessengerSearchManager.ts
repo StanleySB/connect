@@ -36,7 +36,7 @@ class MemebersManager {
       searchText
         .toLocaleLowerCase()
         .split(" ")
-        .map((searchItem) => member.name.toLocaleLowerCase().includes(searchItem))
+        .map((searchItem) => member.name.toLocaleLowerCase().startsWith(searchItem))
         .includes(true)
     );
 
@@ -47,7 +47,7 @@ class MemebersManager {
         .map(
           (searchItem) =>
             latest.title.toLocaleLowerCase().includes(searchItem) ||
-            latest.users.map((user) => user.name.toLocaleLowerCase().includes(searchItem)).includes(true)
+            latest.users.map((user) => user.name.toLocaleLowerCase().startsWith(searchItem)).includes(true)
         )
         .includes(true)
     );

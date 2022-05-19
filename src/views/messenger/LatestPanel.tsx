@@ -15,7 +15,7 @@ const LatestDiv = styled.div`
   margin-right: 20px;
   /*background-color: rgba(0,0,0,.3);
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
-  height: 100%;
+  height: calc(100% - 50px);
   margin-top: 50px;
 `;
 

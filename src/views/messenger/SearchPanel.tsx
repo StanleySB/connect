@@ -16,7 +16,7 @@ const SearchPanelDiv = styled.div`
   margin-right: 20px;
   /*background-color: rgba(0,0,0,.3);
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
-  height: 100%;
+  height: calc(100% - 50px);
   margin-top: 50px;
 `;
 
@@ -25,6 +25,29 @@ const SearchPanelBoxDiv = styled.div`
   position: relative;
   overflow: auto;
   flex-grow: 1;
+`;
+
+const SearchPanelBoxContainerDiv = styled.div`
+  position: absolute;
+  color: ${CSS.latestColor};
+  width: 100%;
+`;
+
+const SearchTitle = styled.div`
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  font-size: 20px;
+  padding: 10px;
+  margin: 2px 0px;
+  border-bottom: 1px solid;
+  border-top: 1px solid;
+`;
+
+const SearchEmptyText = styled.div`
+  justify-content: center;
+  display: flex;
+  padding: 5px;
 `;
 
 const SearchPanel = (params: { searchText: string }) => {
@@ -48,15 +71,18 @@ const SearchPanel = (params: { searchText: string }) => {
   return (
     <SearchPanelDiv>
       <SearchPanelBoxDiv>
-        {foundedItems?.members.map((val, index) => (
-          <MemberItem memberVO={val} key={index} departament={foundedItems.departaments.get(val.department_id)} />
-        ))}
-        {foundedItems?.members.length === 0 && "No Members found"}
-
-        {foundedItems?.latests.map((val, index) => (
-          <LatestItem chatVO={val} key={index} />
-        ))}
-        {foundedItems?.latests.length === 0 && "No Chats found"}
+        <SearchPanelBoxContainerDiv>
+          <SearchTitle>Chats</SearchTitle>
+          {foundedItems?.latests.map((val, index) => (
+            <LatestItem chatVO={val} key={index} />
+          ))}
+          {foundedItems?.latests.length === 0 && <SearchEmptyText>No Chats found</SearchEmptyText>}
+          <SearchTitle>Members</SearchTitle>
+          {foundedItems?.members.map((val, index) => (
+            <MemberItem memberVO={val} key={index} departament={foundedItems.departaments.get(val.department_id)} />
+          ))}
+          {foundedItems?.members.length === 0 && <SearchEmptyText>No Members found</SearchEmptyText>}
+        </SearchPanelBoxContainerDiv>
       </SearchPanelBoxDiv>
     </SearchPanelDiv>
   );
