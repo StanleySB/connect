@@ -12,11 +12,10 @@ const MemberDiv = styled.div`
   flex-grow: 0.3;
   max-width: 400px;
   min-width: 350px;
-  margin-right: 20px;
   /*background-color: rgba(0,0,0,.3);
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
-  height: calc(100% - 50px);
-  margin-top: 50px;
+  height: calc(100% - 70px);
+  margin-top: 70px;
 `;
 
 const MemberBoxDiv = styled.div`

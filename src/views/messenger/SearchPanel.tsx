@@ -13,11 +13,10 @@ const SearchPanelDiv = styled.div`
   flex-grow: 0.3;
   max-width: 400px;
   min-width: 350px;
-  margin-right: 20px;
   /*background-color: rgba(0,0,0,.3);
     box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
-  height: calc(100% - 50px);
-  margin-top: 50px;
+  height: calc(100% - 70px);
+  margin-top: 70px;
 `;
 
 const SearchPanelBoxDiv = styled.div`
@@ -34,20 +33,9 @@ const SearchPanelBoxContainerDiv = styled.div`
 `;
 
 const SearchTitle = styled.div`
-  width: 100%;
-  justify-content: center;
-  display: flex;
-  font-size: 20px;
-  padding: 10px;
-  margin: 2px 0px;
-  border-bottom: 1px solid;
-  border-top: 1px solid;
-`;
-
-const SearchEmptyText = styled.div`
-  justify-content: center;
-  display: flex;
-  padding: 5px;
+  padding: 20px 0px 10px 20px;
+  color: rgba(238, 255, 245, 0.55);
+  text-transform: uppercase;
 `;
 
 const SearchPanel = (params: { searchText: string }) => {
@@ -56,7 +44,7 @@ const SearchPanel = (params: { searchText: string }) => {
 
   useEffect(() => {
     GD.S_MESSENGER_SEARCH_READY.add((foundedItems) => {
-      setFoundedItems(foundedItems);
+      setFoundedItems({ ...foundedItems });
     }, "searchPanel");
 
     return () => {
@@ -72,16 +60,14 @@ const SearchPanel = (params: { searchText: string }) => {
     <SearchPanelDiv>
       <SearchPanelBoxDiv>
         <SearchPanelBoxContainerDiv>
-          <SearchTitle>Chats</SearchTitle>
+          <SearchTitle>Chats:</SearchTitle>
           {foundedItems?.latests.map((val, index) => (
             <LatestItem chatVO={val} key={index} />
           ))}
-          {foundedItems?.latests.length === 0 && <SearchEmptyText>No Chats found</SearchEmptyText>}
-          <SearchTitle>Members</SearchTitle>
+          <SearchTitle>Members:</SearchTitle>
           {foundedItems?.members.map((val, index) => (
             <MemberItem memberVO={val} key={index} departament={foundedItems.departaments.get(val.department_id)} />
           ))}
-          {foundedItems?.members.length === 0 && <SearchEmptyText>No Members found</SearchEmptyText>}
         </SearchPanelBoxContainerDiv>
       </SearchPanelBoxDiv>
     </SearchPanelDiv>
