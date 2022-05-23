@@ -153,7 +153,7 @@ const MessengerTabItem = (params: { icon: string; onClick: () => void; title: st
   const { icon, onClick, title, activeTab, tab } = params;
   return (
     <>
-      <Chip text={title} open={isChipOpen} additioanalStyle={{ right: "-60px" }} />
+      <Chip text={title} open={isChipOpen} additioanalStyle={{ right: "-65px" }} direction="right" />
       <TabItemDiv
         style={{ backgroundImage: `url(${icon})` }}
         onClick={onClick}
@@ -169,7 +169,7 @@ const CreateNewChatBtn = () => {
   const [isChipOpen, setIsChipOpen] = useState(false);
   return (
     <>
-      <Chip text={"Create new Chat"} open={isChipOpen} additioanalStyle={{ right: "-60px" }} />
+      <Chip text={"Create new Chat"} open={isChipOpen} additioanalStyle={{ right: "-65px" }} direction="right" />
       <CreateBtn
         style={{ backgroundImage: `url(${createNewChatIcon})` }}
         onClick={() => {}}
