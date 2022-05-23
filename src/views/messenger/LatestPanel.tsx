@@ -2,34 +2,7 @@ import React, { useState, useEffect, memo } from "react";
 import styled from "styled-components";
 import GD from "../../GD";
 import Avatar from "../Avatar";
-import CSS from "../CSS";
-
-const LatestDiv = styled.div`
-  color: ${CSS.latestColor};
-  font-family: "Open Sans", sans-serif;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 0.3;
-  max-width: 400px;
-  min-width: 350px;
-  /*background-color: rgba(0,0,0,.3);
-    box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
-  height: calc(100% - 70px);
-  margin-top: 70px;
-`;
-
-const LatestBoxDiv = styled.div`
-  color: ${CSS.latestColor};
-  position: relative;
-  overflow: auto;
-  flex-grow: 1;
-`;
-
-const LatestBoxContainerDiv = styled.div`
-  position: absolute;
-  color: ${CSS.latestColor};
-  width: 100%;
-`;
+import { PanelBoxContainerDiv, PanelBoxDiv, PanelDiv } from "./Messenger";
 
 const LatestItemDiv = styled.div`
   padding: 20px 12px 20px 12px;
@@ -97,19 +70,29 @@ const LatestItemMsgDiv = styled(LatestItemTitleDiv)`
   }
 `;
 const LatestItemTimeDiv = styled(LatestItemTitleDiv)`
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 12px;
   width: 45px;
   min-width: 45px;
   text-align: right;
   margin-right: 5px;
-  color: #ffffff85;
+  color: #fff5d2;
   display: flex;
   flex-direction: column;
   &::after {
     content: attr(data-unread);
-    color: #ffc107;
-    font-size: 15px;
-    margin-top: 2px;
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 12px;
+    margin-top: 4px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #f11873;
+    padding-top: 2px;
+    box-sizing: border-box;
+    text-align: center;
+    margin-left: 25px;
   }
   &[data-unread="0"]::after {
     display: none;
@@ -189,7 +172,7 @@ export const LatestItem = (params: { chatVO: ChatVO }) => {
     <>
       {date}
       <LatestItemDiv data-unread={unread > 0} data-selected={selected} onClick={onChatClick}>
-        <Avatar user="" avatar="" />
+        <Avatar user={title} avatar="" />
         <LatestItemMsgBlockDiv>
           <LatestItemTitleDiv data-unread={unread > 0}>{title}</LatestItemTitleDiv>
           {msg}
@@ -215,11 +198,11 @@ const LatestPanel = () => {
   let i = 0;
   const latestList = latest.map((val) => <LatestItem chatVO={val} key={i++} />);
   return (
-    <LatestDiv>
-      <LatestBoxDiv>
-        <LatestBoxContainerDiv>{latestList}</LatestBoxContainerDiv>
-      </LatestBoxDiv>
-    </LatestDiv>
+    <PanelDiv>
+      <PanelBoxDiv>
+        <PanelBoxContainerDiv>{latestList}</PanelBoxContainerDiv>
+      </PanelBoxDiv>
+    </PanelDiv>
   );
 };
 export default LatestPanel;

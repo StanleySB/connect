@@ -1,36 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import GD from "../../GD";
-import CSS from "../CSS";
 import { LatestItem } from "./LatestPanel";
 import { MemberItem } from "./MembersPanel";
-
-const SearchPanelDiv = styled.div`
-  color: ${CSS.latestColor};
-  font-family: "Open Sans", sans-serif;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 0.3;
-  max-width: 400px;
-  min-width: 350px;
-  /*background-color: rgba(0,0,0,.3);
-    box-shadow:0px 0px 20px rgba(0,0,0,.2);*/
-  height: calc(100% - 70px);
-  margin-top: 70px;
-`;
-
-const SearchPanelBoxDiv = styled.div`
-  color: ${CSS.latestColor};
-  position: relative;
-  overflow: auto;
-  flex-grow: 1;
-`;
-
-const SearchPanelBoxContainerDiv = styled.div`
-  position: absolute;
-  color: ${CSS.latestColor};
-  width: 100%;
-`;
+import { PanelBoxContainerDiv, PanelBoxDiv, PanelDiv } from "./Messenger";
 
 const SearchTitle = styled.div`
   padding: 20px 0px 10px 20px;
@@ -57,9 +30,9 @@ const SearchPanel = (params: { searchText: string }) => {
   }, [searchText]);
 
   return (
-    <SearchPanelDiv>
-      <SearchPanelBoxDiv>
-        <SearchPanelBoxContainerDiv>
+    <PanelDiv>
+      <PanelBoxDiv>
+        <PanelBoxContainerDiv>
           <SearchTitle>Chats:</SearchTitle>
           {foundedItems?.latests.map((val, index) => (
             <LatestItem chatVO={val} key={index} />
@@ -68,9 +41,9 @@ const SearchPanel = (params: { searchText: string }) => {
           {foundedItems?.members.map((val, index) => (
             <MemberItem memberVO={val} key={index} departament={foundedItems.departaments.get(val.department_id)} />
           ))}
-        </SearchPanelBoxContainerDiv>
-      </SearchPanelBoxDiv>
-    </SearchPanelDiv>
+        </PanelBoxContainerDiv>
+      </PanelBoxDiv>
+    </PanelDiv>
   );
 };
 export default SearchPanel;

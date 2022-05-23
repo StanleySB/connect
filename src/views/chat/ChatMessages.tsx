@@ -446,7 +446,7 @@ const ChatMessage = (params: { message: MessageVO }) => {
   if (!message.mine && (message.position === "last" || message.position === "standalone"))
     avatar = (
       <ChatAvatarHolderDiv>
-        <Avatar user={message.user_uid} avatar={message.user_avatar} />
+        <Avatar user={message.user_name} avatar={message.user_avatar} />
       </ChatAvatarHolderDiv>
     );
 
